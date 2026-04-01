@@ -3,6 +3,7 @@
 #include <mysql/mysql.h>
 #include <sys/msg.h>
 #include <stdlib.h>
+#include "database.h"
 
 struct eki_info {
     int retsuban;
@@ -17,9 +18,6 @@ struct msgbuf {
     struct eki_info eki_info[256];
 };
 
-MYSQL *connect_db(void);
-MYSQL_RES *select_ekiinfo(MYSQL *conn);
-int insert_unkouinfo(MYSQL *conn, const char *ekiname, const char *retsuban, const char *arr, const char *dep);
 int send_msg(int msgid, struct msgbuf *msg);
 
 int main()
@@ -81,87 +79,6 @@ int main()
     }
 
     mysql_close(conn);
-    return 0;
-}
-
-MYSQL *connect_db(void)
-{
-    MYSQL *conn;
-
-    conn = mysql_init(NULL);
-    if (conn == NULL)
-    {
-        printf("mysql_init failed\n");
-        return NULL;
-    }
-
-    if (!mysql_real_connect(conn, "localhost", "train_user", "1234", "train_db", 0, NULL, 0))
-    {
-        printf("DB connection failed: %s\n", mysql_error(conn));
-        mysql_close(conn);
-        return NULL;
-    }
-
-    return conn;
-}
-
-MYSQL_RES *select_ekiinfo(MYSQL *conn)
-{
-    MYSQL_RES *res;
-
-    printf("process[A] SELECT\n");
-    const char *query =
-        "SELECT "
-        "  EKIINFO.EKINAME, "
-        "  EKIINFO.RETSUBAN, "
-        "  DATE_FORMAT(EKIINFO.ARR_TIME, '%Y-%m-%d %H:%i:%s'), "
-        "  DATE_FORMAT(EKIINFO.DEP_TIME, '%Y-%m-%d %H:%i:%s') "
-        "FROM EKIINFO "
-        "LEFT JOIN UNKOUINFO "
-        "  ON EKIINFO.RETSUBAN = UNKOUINFO.RETSUBAN "
-        " AND EKIINFO.EKINAME = UNKOUINFO.EKINAME "
-        "WHERE EKIINFO.STATUS = 1 "
-        "  AND ( "
-        "        (EKIINFO.ARR_TIME IS NULL AND EKIINFO.DEP_TIME <= NOW()) "
-        "        OR "
-        "        (EKIINFO.ARR_TIME IS NOT NULL AND EKIINFO.ARR_TIME <= NOW()) "
-        "      ) "
-        "  AND UNKOUINFO.RETSUBAN IS NULL "
-        "ORDER BY COALESCE(EKIINFO.ARR_TIME, EKIINFO.DEP_TIME) ASC";
-
-    if (mysql_query(conn, query))
-    {
-        printf("query error: %s\n", mysql_error(conn));
-        return NULL;
-    }
-
-    res = mysql_store_result(conn);
-    if (res == NULL)
-    {
-        printf("result error: %s\n", mysql_error(conn));
-        return NULL;
-    }
-
-    return res;
-}
-
-int insert_unkouinfo(MYSQL *conn, const char *ekiname, const char *retsuban, const char *arr, const char *dep)
-{
-    char insert_query[256];
-
-    printf("process[A] INSERT\n");
-    snprintf(insert_query, sizeof(insert_query),
-        "INSERT INTO UNKOUINFO (EKINAME, RETSUBAN, ARR_TIME, DEP_TIME) "
-        "VALUES ('%s', '%s', '%s', '%s')",
-        ekiname, retsuban, arr, dep);
-
-    if (mysql_query(conn, insert_query))
-    {
-        printf("INSERT error: %s\n", mysql_error(conn));
-        return 1;
-    }
-
-    printf("process[A] INSERT success\n");
     return 0;
 }
 

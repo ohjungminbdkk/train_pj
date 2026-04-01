@@ -2,15 +2,16 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "run C",
+      "label": "run process A",
       "type": "shell",
-      //"command": "gcc process_a.c -o process_a -lmysqlclient && ./process_a",
-       "command": "gcc msgrcv_test.c -o msgrcv_test && ./msgrcv_test",
-      // "command": "gcc msgrev_test.c -o msgrev_test && ./msgrev_test",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
+      "command": "gcc process_a.c database.c -o process_a -lmysqlclient && ./process_a",
+      "group": "build"
+    },
+    {
+      "label": "run process B",
+      "type": "shell",
+      "command": "gcc process_b.c database.c -o process_b -lmysqlclient && ./process_b",
+      "group": "build"
     }
   ]
 }

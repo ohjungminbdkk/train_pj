@@ -5,20 +5,7 @@
 #include <sys/msg.h>
 #include <mysql/mysql.h>
 #include "database.h"
-
-struct eki_info {
-    int retsuban;
-    char ekiname[20];
-    char arr[20];
-    char dep[20];
-};
-
-struct msgbuf {
-    long mtype;
-    int count;
-    struct eki_info eki_info[256];
-};
-
+#include "msg.h"
 
 int main()
 {
@@ -33,10 +20,9 @@ int main()
         return 1;
     }
 
-    msgid = msgget((key_t)1234, 0666 | IPC_CREAT);
+    msgid = get_msgid();
     if (msgid == -1)
     {
-        printf("msgget failed\n");
         mysql_close(conn);
         return 1;
     }
@@ -45,12 +31,8 @@ int main()
 
     while (1)
     {
-        //msg初期化
-        memset(&msg, 0, sizeof(msg));
-
-        if (msgrcv(msgid, &msg, sizeof(msg) - sizeof(long), 1, 0) == -1)
+        if (recv_msg(msgid, &msg) != 0)
         {
-            printf("[ERROR] msgrcv failed\n");
             sleep(1);
             continue;
         }

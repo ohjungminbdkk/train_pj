@@ -4,13 +4,13 @@
     {
       "label": "run process A",
       "type": "shell",
-      "command": "gcc process_a.c database.c -o process_a -lmysqlclient && ./process_a",
+      "command": "gcc process_a.c database.c msg.c -o process_a -lmysqlclient && ./process_a",
       "group": "build"
     },
     {
       "label": "run process B",
       "type": "shell",
-      "command": "gcc process_b.c database.c -o process_b -lmysqlclient && ./process_b",
+      "command": "gcc process_b.c database.c msg.c -o process_b -lmysqlclient && ./process_b",
       "group": "build"
     }
   ]

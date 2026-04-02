@@ -1,6 +1,6 @@
 #include <stdio.h>
+#include <string.h>
 #include <mysql/mysql.h>
-
 
 MYSQL *connect_db(void)
 {
@@ -46,14 +46,12 @@ MYSQL_RES *select_ekiinfo(MYSQL *conn)
         "LEFT JOIN UNKOUINFO "
         "  ON EKIINFO.RETSUBAN = UNKOUINFO.RETSUBAN "
         " AND EKIINFO.EKINAME = UNKOUINFO.EKINAME "
+        " AND EKIINFO.ARR_TIME = UNKOUINFO.ARR_TIME "
         "WHERE EKIINFO.STATUS = 1 "
-        "  AND ( "
-        "        (EKIINFO.ARR_TIME IS NULL AND EKIINFO.DEP_TIME <= NOW()) "
-        "        OR "
-        "        (EKIINFO.ARR_TIME IS NOT NULL AND EKIINFO.ARR_TIME <= NOW()) "
-        "      ) "
+        "  AND EKIINFO.ARR_TIME IS NOT NULL "
+        "  AND EKIINFO.ARR_TIME <= NOW() "
         "  AND UNKOUINFO.RETSUBAN IS NULL "
-        "ORDER BY COALESCE(EKIINFO.ARR_TIME, EKIINFO.DEP_TIME) ASC";
+        "ORDER BY EKIINFO.ARR_TIME ASC";
 
     if (mysql_query(conn, query))
     {
@@ -76,10 +74,20 @@ int insert_unkouinfo(MYSQL *conn, const char *ekiname, const char *retsuban, con
     char insert_query[256];
 
     printf("process[A] INSERT\n");
-    snprintf(insert_query, sizeof(insert_query),
-        "INSERT INTO UNKOUINFO (EKINAME, RETSUBAN, ARR_TIME, DEP_TIME) "
-        "VALUES ('%s', '%s', '%s', '%s')",
-        ekiname, retsuban, arr, dep);
+    if (dep == NULL || strlen(dep) == 0)
+    {
+        snprintf(insert_query, sizeof(insert_query),
+            "INSERT INTO UNKOUINFO (EKINAME, RETSUBAN, ARR_TIME, DEP_TIME) "
+            "VALUES ('%s', '%s', '%s', NULL)",
+            ekiname, retsuban, arr);
+    }
+    else
+    {
+        snprintf(insert_query, sizeof(insert_query),
+            "INSERT INTO UNKOUINFO (EKINAME, RETSUBAN, ARR_TIME, DEP_TIME) "
+            "VALUES ('%s', '%s', '%s', '%s')",
+            ekiname, retsuban, arr, dep);
+    }
 
     if (mysql_query(conn, insert_query))
     {
@@ -95,15 +103,32 @@ int update_ekiinfo(MYSQL *conn, int retsuban, const char *ekiname, const char *a
 {
     char query[512];
 
-    snprintf(query, sizeof(query),
-        "UPDATE EKIINFO "
-        "SET STATUS = 2 "
-        "WHERE RETSUBAN = %d "
-        "AND EKINAME = '%s' "
-        "AND ARR_TIME = '%s' "
-        "AND DEP_TIME = '%s' "
-        "AND STATUS = 1",
-        retsuban, ekiname, arr, dep);
+    if (dep == NULL || strlen(dep) == 0)
+    {
+        snprintf(query, sizeof(query),
+            "UPDATE EKIINFO "
+            "SET STATUS = 2 "
+            "WHERE RETSUBAN = %d "
+            "AND EKINAME = '%s' "
+            "AND ARR_TIME = '%s' "
+            "AND DEP_TIME IS NULL "
+            "AND STATUS = 1",
+            retsuban, ekiname, arr);
+    }
+    else
+    {
+        snprintf(query, sizeof(query),
+            "UPDATE EKIINFO "
+            "SET STATUS = 2 "
+            "WHERE RETSUBAN = %d "
+            "AND EKINAME = '%s' "
+            "AND ARR_TIME = '%s' "
+            "AND DEP_TIME = '%s' "
+            "AND STATUS = 1",
+            retsuban, ekiname, arr, dep);
+    }
+
+    printf("UPDATE SQL: %s\n", query);
 
     if (mysql_query(conn, query))
     {

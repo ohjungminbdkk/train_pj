@@ -138,3 +138,96 @@ int update_ekiinfo(MYSQL *conn, int retsuban, const char *ekiname, const char *a
 
     return 0;
 }
+
+// int select_eki(MYSQL *conn, struct eki eki_list[], int *eki_count)
+// {
+//     const char *query =
+//         "SELECT EKICODE, EKINAME "
+//         "FROM EKICODE "
+//         "ORDER BY EKICODE";
+
+//     MYSQL_RES *res;
+//     MYSQL_ROW row;
+//     int i = 0;
+
+//     *eki_count = 0;
+
+//     if (mysql_query(conn, query))
+//     {
+//         printf("select_eki error: %s\n", mysql_error(conn));
+//         return 1;
+//     }
+
+//     res = mysql_store_result(conn);
+//     if (res == NULL)
+//     {
+//         printf("select_eki store_result error: %s\n", mysql_error(conn));
+//         return 1;
+//     }
+
+//     while ((row = mysql_fetch_row(res)) != NULL)
+//     {
+//         if (i >= MAX_EKI)
+//         {
+//             printf("select_eki overflow\n");
+//             mysql_free_result(res);
+//             return 1;
+//         }
+
+//         eki_list[i].code = atoi(row[0]);
+//         snprintf(eki_list[i].name, sizeof(eki_list[i].name), "%s", row[1]);
+//         i++;
+//     }
+
+//     mysql_free_result(res);
+//     *eki_count = i;
+
+//     return 0;
+// }
+
+// int select_train(MYSQL *conn, struct train train_list[], int *train_count)
+// {
+//     const char *query =
+//         "SELECT RETSUBAN, START_EKICODE, END_EKICODE "
+//         "FROM TRAININFO "
+//         "ORDER BY RETSUBAN";
+
+//     MYSQL_RES *res;
+//     MYSQL_ROW row;
+//     int i = 0;
+
+//     *train_count = 0;
+
+//     if (mysql_query(conn, query))
+//     {
+//         printf("select_train error: %s\n", mysql_error(conn));
+//         return 1;
+//     }
+
+//     res = mysql_store_result(conn);
+//     if (res == NULL)
+//     {
+//         printf("select_train store_result error: %s\n", mysql_error(conn));
+//         return 1;
+//     }
+
+//     while ((row = mysql_fetch_row(res)) != NULL)
+//     {
+//         if (i >= MAX_TRAIN)
+//         {
+//             printf("select_train overflow\n");
+//             mysql_free_result(res);
+//             return 1;
+//         }
+
+//         train_list[i].retsuban = atoi(row[0]);
+//         train_list[i].start_code = atoi(row[1]);
+//         train_list[i].end_code = atoi(row[2]);
+//         i++;
+//     }
+
+//     mysql_free_result(res);
+//     *train_count = i;
+
+//     return 0;
+// }

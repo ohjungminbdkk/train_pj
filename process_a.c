@@ -31,7 +31,6 @@ int main()
 
     while (1)
     {
-        msg.mtype = MSG_TYPE;
         msg.count = 0;
         res = select_ekiinfo(conn);
         
@@ -58,6 +57,7 @@ int main()
             if (msg.count > 0)
             {
                 send_msg(msgid, &msg);
+                exec_b();
             }
 
             mysql_free_result(res);

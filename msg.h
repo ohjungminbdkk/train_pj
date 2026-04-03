@@ -20,6 +20,7 @@ struct msgbuf {
 
 int get_msgid(void);
 int send_msg(int msgid, struct msgbuf *msg);
-int recv_msg(int msgid, struct msgbuf *msg);
+int gfact(int msgid, struct msgbuf *msg);
+void exec_b(void);
 
 #endif

@@ -29,50 +29,46 @@ int main()
 
     printf("process[B] start\n");
 
-    while (1)
+    if (gfact(msgid, &msg) != 0)
     {
-        if (recv_msg(msgid, &msg) != 0)
+        mysql_close(conn);
+        return 1;
+    }
+
+    printf("[INFO] process[B] MSG RECV success, count=%d\n", msg.count);
+
+    for (i = 0; i < msg.count; i++)
+    {
+        printf("[INFO] process[B] UPDATE target:\n");
+        printf("retsuban=%d\n", msg.eki_info[i].retsuban);
+        printf("ekiname=%s\n", msg.eki_info[i].ekiname);
+        printf("arr=%s\n", msg.eki_info[i].arr);
+        printf("dep=%s\n", msg.eki_info[i].dep);
+
+        if (update_ekiinfo(conn,
+                        msg.eki_info[i].retsuban,
+                        msg.eki_info[i].ekiname,
+                        msg.eki_info[i].arr,
+                        msg.eki_info[i].dep) != 0)
         {
-            sleep(1);
-            continue;
+            printf("[ERROR] process[B] UPDATE failed:\n");
+            printf("retsuban=%d ekiname=%s arr=%s dep=%s\n",
+                msg.eki_info[i].retsuban,
+                msg.eki_info[i].ekiname,
+                msg.eki_info[i].arr,
+                msg.eki_info[i].dep);
         }
-
-        printf("[INFO] process[B] MSG RECV success, count=%d\n", msg.count);
-
-        for (i = 0; i < msg.count; i++)
+        else
         {
-            printf("[INFO] process[B] UPDATE target:\n");
-            printf("retsuban=%d\n", msg.eki_info[i].retsuban);
-            printf("ekiname=%s\n", msg.eki_info[i].ekiname);
-            printf("arr=%s\n", msg.eki_info[i].arr);
-            printf("dep=%s\n", msg.eki_info[i].dep);
-
-            if (update_ekiinfo(conn,
-                            msg.eki_info[i].retsuban,
-                            msg.eki_info[i].ekiname,
-                            msg.eki_info[i].arr,
-                            msg.eki_info[i].dep) != 0)
-            {
-                printf("[ERROR] process[B] UPDATE failed:\n");
-                printf("retsuban=%d ekiname=%s arr=%s dep=%s\n",
-                    msg.eki_info[i].retsuban,
-                    msg.eki_info[i].ekiname,
-                    msg.eki_info[i].arr,
-                    msg.eki_info[i].dep);
-            }
-            else
-            {
-                printf("[INFO] process[B] UPDATE success:\n");
-                printf("retsuban=%d ekiname=%s arr=%s dep=%s\n",
-                    msg.eki_info[i].retsuban,
-                    msg.eki_info[i].ekiname,
-                    msg.eki_info[i].arr,
-                    msg.eki_info[i].dep);
-            }
+            printf("[INFO] process[B] UPDATE success:\n");
+            printf("retsuban=%d ekiname=%s arr=%s dep=%s\n",
+                msg.eki_info[i].retsuban,
+                msg.eki_info[i].ekiname,
+                msg.eki_info[i].arr,
+                msg.eki_info[i].dep);
         }
     }
 
     mysql_close(conn);
     return 0;
 }
-

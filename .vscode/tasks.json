@@ -2,16 +2,13 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "run process A",
+      "label": "run train project",
       "type": "shell",
-      "command": "gcc process_a.c database.c msg.c -o process_a -lmysqlclient && ./process_a",
-      "group": "build"
-    },
-    {
-      "label": "run process B",
-      "type": "shell",
-      "command": "gcc process_b.c database.c msg.c -o process_b -lmysqlclient && ./process_b",
-      "group": "build"
+      "command": "gcc process_b.c database.c msg.c -o process_b -lmysqlclient && gcc process_a.c database.c msg.c -o process_a -lmysqlclient && ./process_a",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     }
   ]
 }

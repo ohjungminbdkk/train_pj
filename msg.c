@@ -1,6 +1,9 @@
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/msg.h>
+#include <sys/wait.h>
 #include "msg.h"
 
 int get_msgid(void)
@@ -23,6 +26,8 @@ int send_msg(int msgid, struct msgbuf *msg)
 
     printf("process[A] MSG SEND\n");
 
+    msg->mtype = MSG_TYPE;
+
     msg_size = sizeof(msg->count) + sizeof(struct eki_info) * msg->count;
 
     if (msgsnd(msgid, msg, msg_size, 0) == -1)
@@ -35,7 +40,7 @@ int send_msg(int msgid, struct msgbuf *msg)
     return 0;
 }
 
-int recv_msg(int msgid, struct msgbuf *msg)
+int gfact(int msgid, struct msgbuf *msg)
 {
     //msg初期化
     memset(msg, 0, sizeof(struct msgbuf));
@@ -47,4 +52,26 @@ int recv_msg(int msgid, struct msgbuf *msg)
     }
 
     return 0;
+}
+
+void exec_b(void)
+{
+    pid_t pid = fork();
+
+    if (pid < 0)
+    {
+        printf("process[A] fork failed\n");
+        return;
+    }
+
+    if (pid == 0)
+    {
+        execl("./process_b", "process_b", NULL);
+        printf("process[A] execl failed\n");
+        exit(1);
+    }
+    else
+    {
+        waitpid(pid, NULL, 0);
+    }
 }

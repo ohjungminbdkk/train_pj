@@ -4,7 +4,7 @@
     {
       "label": "run train project",
       "type": "shell",
-      "command": "gcc process_b.c database.c msg.c -o process_b -lmysqlclient && gcc process_a.c database.c msg.c -o process_a -lmysqlclient && ./process_a",
+      "command": "gcc process_b.c database.c msg.c -o process_b -lmysqlclient && gcc process_a.c database.c msg.c validate.c -o process_a -lmysqlclient && ./process_a",
       "group": {
         "kind": "build",
         "isDefault": true
